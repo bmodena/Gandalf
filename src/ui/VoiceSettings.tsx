@@ -61,6 +61,22 @@ export function VoiceSettings() {
       </label>
 
       <label className="field">
+        <span className="field-label">
+          Account email
+          <span className="field-hint"> (groups recordings for training)</span>
+        </span>
+        <input
+          type="email"
+          inputMode="email"
+          value={draft.email ?? ''}
+          onChange={(e) => {
+            setSaved(false);
+            setDraft({ ...draft, email: e.target.value });
+          }}
+        />
+      </label>
+
+      <label className="field">
         <span className="field-label">Voice</span>
         <select
           value={draft.settings.voiceURI ?? ''}

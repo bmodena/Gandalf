@@ -44,6 +44,8 @@ export interface ProfileSettings {
 export interface Profile {
   id: string;
   name: string;
+  /** Lightweight account key — recordings are grouped under this email in the corpus. */
+  email?: string;
   createdAt: number;
   /** Timestamp the caregiver accepted the recording/consent notice, or null. */
   consentAcceptedAt: number | null;

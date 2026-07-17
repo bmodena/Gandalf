@@ -4,6 +4,7 @@ import { TopBar } from './ui/TopBar';
 import { TalkMode } from './ui/TalkMode';
 import { TrainerMode } from './ui/TrainerMode';
 import { ConsentGate } from './ui/ConsentGate';
+import { EmailGate } from './ui/EmailGate';
 import { PinGate } from './ui/PinGate';
 
 export default function App() {
@@ -30,6 +31,10 @@ export default function App() {
 
   if (!profile.consentAcceptedAt) {
     return <ConsentGate />;
+  }
+
+  if (!profile.email) {
+    return <EmailGate />;
   }
 
   const needsPin = mode === 'trainer' && Boolean(profile.settings.pin) && !trainerUnlocked;

@@ -23,6 +23,7 @@ interface AppState {
   setTrainerUnlocked: (unlocked: boolean) => void;
   saveProfile: (profile: Profile) => Promise<void>;
   acceptConsent: () => Promise<void>;
+  setEmail: (email: string) => Promise<void>;
   refreshPhrases: () => Promise<void>;
   refreshTemplateCounts: () => Promise<void>;
   /** Best-effort upload of any not-yet-synced samples to the corpus. */
@@ -71,6 +72,14 @@ export const useStore = create<AppState>((set, get) => ({
     set({ profile: updated });
   },
 
+  setEmail: async (email) => {
+    const profile = get().profile;
+    if (!profile) return;
+    const updated: Profile = { ...profile, email: email.trim() };
+    await data.putProfile(updated);
+    set({ profile: updated });
+  },
+
   refreshPhrases: async () => {
     const profile = get().profile;
     if (!profile) return;
@@ -90,6 +99,6 @@ export const useStore = create<AppState>((set, get) => ({
   syncNow: async () => {
     const { profile, phrases } = get();
     if (!profile) return;
-    await syncPending(profile.id, phrases);
+    await syncPending(profile, phrases);
   },
 }));

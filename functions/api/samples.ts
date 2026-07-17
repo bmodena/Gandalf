@@ -76,13 +76,14 @@ export const onRequestPost = async (context: Context): Promise<Response> => {
 
     await env.DB.prepare(
       `INSERT OR REPLACE INTO samples
-        (id, profile_id, phrase_id, phrase_text, category, label_source,
+        (id, profile_id, email, phrase_id, phrase_text, category, label_source,
          duration_ms, sample_rate, audio_key, audio_format, client_created_at, created_at, user_agent)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     )
       .bind(
         id,
         profileId,
+        str(meta.email) || null,
         phraseId,
         str(meta.phraseText),
         str(meta.category) || null,

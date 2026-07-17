@@ -6,7 +6,7 @@
  * Uses your existing `wrangler` login — no API token needed.
  *
  * Usage:
- *   node scripts/export-corpus.mjs [--out <dir>] [--profile <profileId>] [--no-audio]
+ *   node scripts/export-corpus.mjs [--out <dir>] [--email <addr>] [--profile <id>] [--no-audio]
  *
  * Output:
  *   <out>/labels.jsonl   one JSON object per sample
@@ -28,7 +28,10 @@ const getArg = (flag, fallback) => {
 };
 const outDir = getArg('--out', 'corpus-export');
 const profileFilter = getArg('--profile', null);
+const emailFilter = getArg('--email', null);
 const skipAudio = args.includes('--no-audio');
+
+const sqlEscape = (s) => s.replace(/'/g, "''");
 
 const env = { ...process.env, CLOUDFLARE_ACCOUNT_ID: ACCOUNT_ID };
 
@@ -41,7 +44,10 @@ function wrangler(wrArgs, opts = {}) {
 }
 
 function queryD1() {
-  const where = profileFilter ? `WHERE profile_id = '${profileFilter}'` : '';
+  const conditions = [];
+  if (profileFilter) conditions.push(`profile_id = '${sqlEscape(profileFilter)}'`);
+  if (emailFilter) conditions.push(`email = '${sqlEscape(emailFilter)}'`);
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   const sql = `SELECT * FROM samples ${where} ORDER BY created_at ASC`;
   const raw = wrangler(
     ['d1', 'execute', DB, '--remote', '--json', '--command', sql],
@@ -87,7 +93,12 @@ function downloadAudio(rows) {
 }
 
 // --- run ---
-console.log(`Querying D1 (${DB})${profileFilter ? ` for profile ${profileFilter}` : ''}…`);
+const filterNote = emailFilter
+  ? ` for email ${emailFilter}`
+  : profileFilter
+    ? ` for profile ${profileFilter}`
+    : '';
+console.log(`Querying D1 (${DB})${filterNote}…`);
 const rows = queryD1();
 console.log(`Found ${rows.length} sample(s).`);
 

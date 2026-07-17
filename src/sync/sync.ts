@@ -1,5 +1,5 @@
 import * as data from '../data/db';
-import type { Phrase, Template } from '../types';
+import type { Phrase, Profile, Template } from '../types';
 import { SYNC } from './config';
 
 /**
@@ -11,18 +11,18 @@ import { SYNC } from './config';
 
 let running = false;
 
-export async function syncPending(profileId: string, phrases: Phrase[]): Promise<void> {
+export async function syncPending(profile: Profile, phrases: Phrase[]): Promise<void> {
   if (!SYNC.enabled || running) return;
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
 
   running = true;
   try {
-    const pending = await data.getUnsyncedTemplates(profileId);
+    const pending = await data.getUnsyncedTemplates(profile.id);
     if (pending.length === 0) return;
 
     const phraseById = new Map(phrases.map((p) => [p.id, p]));
     for (const template of pending) {
-      const uploaded = await uploadTemplate(template, phraseById.get(template.phraseId));
+      const uploaded = await uploadTemplate(template, phraseById.get(template.phraseId), profile.email);
       if (uploaded) await data.markTemplateSynced(template.id);
     }
   } finally {
@@ -30,7 +30,11 @@ export async function syncPending(profileId: string, phrases: Phrase[]): Promise
   }
 }
 
-async function uploadTemplate(template: Template, phrase?: Phrase): Promise<boolean> {
+async function uploadTemplate(
+  template: Template,
+  phrase: Phrase | undefined,
+  email: string | undefined,
+): Promise<boolean> {
   if (!(template.audio instanceof Blob)) return true; // nothing to upload
 
   try {
@@ -41,6 +45,7 @@ async function uploadTemplate(template: Template, phrase?: Phrase): Promise<bool
       JSON.stringify({
         id: template.id,
         profileId: template.profileId,
+        email: email ?? null,
         phraseId: template.phraseId,
         phraseText: phrase?.text ?? '',
         category: phrase?.category ?? null,
