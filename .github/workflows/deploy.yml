@@ -24,7 +24,9 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        # npm install (not `npm ci`) tolerates cross-platform optional-dependency
+        # differences between the macOS-generated lockfile and the Linux runner.
+        run: npm install --no-audit --no-fund
 
       - name: Build
         run: npm run build
