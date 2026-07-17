@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import * as data from '../data/db';
 import { buildSeedPhrases, createProfile } from '../data/seed';
+import { syncPending } from '../sync/sync';
 import type { Phrase, Profile } from '../types';
 
 export type Mode = 'talk' | 'trainer';
@@ -24,6 +25,8 @@ interface AppState {
   acceptConsent: () => Promise<void>;
   refreshPhrases: () => Promise<void>;
   refreshTemplateCounts: () => Promise<void>;
+  /** Best-effort upload of any not-yet-synced samples to the corpus. */
+  syncNow: () => Promise<void>;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -49,6 +52,7 @@ export const useStore = create<AppState>((set, get) => ({
     await get().refreshPhrases();
     await get().refreshTemplateCounts();
     set({ ready: true });
+    void get().syncNow();
   },
 
   setMode: (mode) => set({ mode }),
@@ -81,5 +85,11 @@ export const useStore = create<AppState>((set, get) => ({
     const counts: Record<string, number> = {};
     for (const t of templates) counts[t.phraseId] = (counts[t.phraseId] ?? 0) + 1;
     set({ templateCounts: counts });
+  },
+
+  syncNow: async () => {
+    const { profile, phrases } = get();
+    if (!profile) return;
+    await syncPending(profile.id, phrases);
   },
 }));

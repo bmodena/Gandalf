@@ -17,6 +17,13 @@ export default function App() {
     void init();
   }, [init]);
 
+  // Retry corpus upload whenever the device comes back online.
+  useEffect(() => {
+    const onOnline = () => void useStore.getState().syncNow();
+    window.addEventListener('online', onOnline);
+    return () => window.removeEventListener('online', onOnline);
+  }, []);
+
   if (!ready || !profile) {
     return <div className="loading">Loading…</div>;
   }

@@ -16,7 +16,12 @@ export function ConsentGate() {
         <ul className="consent-points">
           <li>🎙️ It records short voice samples to learn from.</li>
           <li>
-            🔒 Everything stays on <b>this device</b>. Voice samples are never uploaded.
+            💾 Samples are saved on <b>this device</b> and also uploaded to a <b>private, secure
+            database</b> the care team controls — used only to improve accuracy and back up the
+            training. They are never sold, shared, or made public.
+          </li>
+          <li>
+            📶 It still works offline; uploads happen in the background when there’s a connection.
           </li>
           <li>
             👤 A caregiver sets up phrases and records samples in <b>Setup</b>.
@@ -24,7 +29,7 @@ export function ConsentGate() {
         </ul>
         <p className="consent-ack">
           By continuing, the caregiver confirms they have this person’s permission to record their
-          voice on this device.
+          voice and store these recordings for training.
         </p>
         <button type="button" className="consent-btn" onClick={() => void acceptConsent()}>
           I understand — continue

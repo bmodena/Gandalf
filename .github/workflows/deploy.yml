@@ -30,6 +30,9 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          # Baked into the client bundle so uploads authenticate to the ingest API.
+          VITE_INGEST_TOKEN: ${{ secrets.VITE_INGEST_TOKEN }}
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3

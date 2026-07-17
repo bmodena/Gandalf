@@ -1,0 +1,20 @@
+{
+  // Cloudflare Pages project config. Bindings here are attached to the
+  // Pages Functions under /functions on deploy.
+  "name": "gandalf",
+  "compatibility_date": "2025-06-01",
+  "pages_build_output_dir": "dist",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "gandalf-samples",
+      "database_id": "d4994328-c5f0-4e04-b7b9-dd2e6e9a8504"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "AUDIO",
+      "bucket_name": "gandalf-audio"
+    }
+  ]
+}

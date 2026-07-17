@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { captureUtterance } from '../audio/capture';
+import { encodeWav } from '../audio/wav';
 import type { Recorder } from '../audio/recorder';
 import { matchUtterance } from '../recognition/matcher';
 import type { PhraseTemplates } from '../recognition/matcher';
@@ -34,6 +35,8 @@ export function useRecognizer() {
   const recorderRef = useRef<Recorder | null>(null);
   const lastMfcc = useRef<number[][] | null>(null);
   const lastDurationMs = useRef(0);
+  const lastAudio = useRef<Float32Array | null>(null);
+  const lastSampleRate = useRef(0);
 
   const buildLibrary = useCallback(async (): Promise<PhraseTemplates[]> => {
     const library: PhraseTemplates[] = [];
@@ -62,6 +65,8 @@ export function useRecognizer() {
 
       lastMfcc.current = captured.mfcc;
       lastDurationMs.current = captured.durationMs;
+      lastAudio.current = captured.audio;
+      lastSampleRate.current = captured.sampleRate;
 
       const library = await buildLibrary();
       const match = matchUtterance(captured.mfcc, library, profile.settings.acceptDistance);
@@ -105,10 +110,16 @@ export function useRecognizer() {
         durationMs: lastDurationMs.current,
         source: 'correction',
         createdAt: Date.now(),
+        audio: lastAudio.current
+          ? encodeWav(lastAudio.current, lastSampleRate.current)
+          : undefined,
+        sampleRate: lastSampleRate.current || undefined,
+        synced: false,
       };
       await data.putTemplate(template);
       await refreshTemplateCounts();
       speak(phrase.spokenText, profile.settings);
+      void useStore.getState().syncNow();
     },
     [profile, refreshTemplateCounts],
   );

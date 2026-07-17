@@ -72,6 +72,11 @@ export interface Template {
   /** Where the sample came from — deliberate enrollment or an in-context correction. */
   source: 'enroll' | 'correction';
   createdAt: number;
+  /** Original recording (WAV), kept locally and uploaded to the training corpus. */
+  audio?: Blob;
+  sampleRate?: number;
+  /** True once this sample has been uploaded to the central corpus. */
+  synced?: boolean;
 }
 
 export interface Candidate {

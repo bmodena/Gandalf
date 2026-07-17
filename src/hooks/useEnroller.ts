@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { captureUtterance } from '../audio/capture';
+import { encodeWav } from '../audio/wav';
 import type { Recorder } from '../audio/recorder';
 import * as data from '../data/db';
 import { useStore } from '../store/useStore';
@@ -40,10 +41,14 @@ export function useEnroller(phrase: Phrase | null) {
         durationMs: captured.durationMs,
         source: 'enroll',
         createdAt: Date.now(),
+        audio: encodeWav(captured.audio, captured.sampleRate),
+        sampleRate: captured.sampleRate,
+        synced: false,
       };
       await data.putTemplate(template);
       await refreshTemplateCounts();
       setState('idle');
+      void useStore.getState().syncNow();
     } catch (err) {
       console.error('Enrollment failed', err);
       setState('error');

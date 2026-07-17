@@ -83,3 +83,17 @@ export async function putTemplate(template: Template): Promise<void> {
 export async function deleteTemplate(templateId: string): Promise<void> {
   await (await db()).delete('templates', templateId);
 }
+
+/** Templates that have local audio but haven't been uploaded to the corpus yet. */
+export async function getUnsyncedTemplates(profileId: string): Promise<Template[]> {
+  const all = await getTemplatesForProfile(profileId);
+  return all.filter((t) => t.audio instanceof Blob && !t.synced);
+}
+
+/** Mark a template as uploaded (keeps the local audio for now). */
+export async function markTemplateSynced(templateId: string): Promise<void> {
+  const database = await db();
+  const template = await database.get('templates', templateId);
+  if (!template) return;
+  await database.put('templates', { ...template, synced: true });
+}
