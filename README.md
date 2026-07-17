@@ -67,6 +67,36 @@ embeddings without touching the UI or data model.
 Then text the URL to the first user; on their phone, "Add to Home Screen"
 installs it as an offline app.
 
+## Training corpus (Cloudflare D1 + R2)
+
+Samples are stored **local-first** (IndexedDB) and uploaded in the background to a
+private corpus when online: audio WAVs go to the R2 bucket `gandalf-audio`, and
+labeled metadata to the D1 database `gandalf-samples`. The ingest API is
+`functions/api/samples.ts` (a Pages Function), gated by an `INGEST_TOKEN` the app
+sends as `x-ingest-token`. Reading the corpus is **not** exposed to the app — only
+the admin export below, which uses your `wrangler` login.
+
+**Export everything for training:**
+
+```bash
+npm run export:corpus                 # -> ./corpus-export/
+npm run export:corpus -- --profile <profileId>   # just one voice
+npm run export:corpus -- --no-audio   # labels only, skip WAV download
+```
+
+Produces `labels.jsonl` + `labels.csv` and `audio/<profileId>/<phraseId>/<id>.wav`.
+
+**Quick end-to-end write test** (needs the ingest token you set):
+
+```bash
+printf 'test' > /tmp/t.wav
+curl -X POST https://gandalf-1ly.pages.dev/api/samples \
+  -H "x-ingest-token: <YOUR_TOKEN>" \
+  -F "audio=@/tmp/t.wav" \
+  -F 'meta={"id":"test-1","profileId":"test","phraseId":"test","phraseText":"test"}'
+# then: npm run export:corpus   (you should see the test row + WAV)
+```
+
 ## Going native later
 
 Wrap this same PWA with **Capacitor** for App Store / Play Store distribution —
