@@ -18,7 +18,10 @@ export function TopBar() {
 
   return (
     <header className="topbar">
-      <div className="topbar-title">🧙 gandalf</div>
+      <div className="topbar-brand">
+        <div className="topbar-title">🧙 gandalf</div>
+        {profile?.name && <div className="topbar-user">{profile.name}</div>}
+      </div>
       <nav className="topbar-modes" aria-label="Mode">
         <button
           type="button"

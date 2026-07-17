@@ -1,8 +1,15 @@
 import { useState } from 'react';
+import { UsersPanel } from './UsersPanel';
 import { PhraseManager } from './PhraseManager';
 import { VoiceSettings } from './VoiceSettings';
 
-type Tab = 'phrases' | 'voice';
+type Tab = 'users' | 'phrases' | 'voice';
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'users', label: 'Users' },
+  { id: 'phrases', label: 'Phrases' },
+  { id: 'voice', label: 'Voice' },
+];
 
 export function TrainerMode() {
   const [tab, setTab] = useState<Tab>('phrases');
@@ -10,26 +17,22 @@ export function TrainerMode() {
   return (
     <div className="trainer">
       <div className="tabs" role="tablist">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'phrases'}
-          className={tab === 'phrases' ? 'active' : ''}
-          onClick={() => setTab('phrases')}
-        >
-          Phrases &amp; Training
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'voice'}
-          className={tab === 'voice' ? 'active' : ''}
-          onClick={() => setTab('voice')}
-        >
-          Voice &amp; Settings
-        </button>
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={tab === t.id}
+            className={tab === t.id ? 'active' : ''}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
-      {tab === 'phrases' ? <PhraseManager /> : <VoiceSettings />}
+      {tab === 'users' && <UsersPanel />}
+      {tab === 'phrases' && <PhraseManager />}
+      {tab === 'voice' && <VoiceSettings />}
     </div>
   );
 }

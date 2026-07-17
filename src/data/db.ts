@@ -46,6 +46,18 @@ export async function putProfile(profile: Profile): Promise<void> {
   await (await db()).put('profiles', profile);
 }
 
+/** Delete a profile and everything belonging to it (phrases + templates). */
+export async function deleteProfile(profileId: string): Promise<void> {
+  const database = await db();
+  const phrases = await database.getAllFromIndex('phrases', 'byProfile', profileId);
+  const templates = await database.getAllFromIndex('templates', 'byProfile', profileId);
+  const tx = database.transaction(['profiles', 'phrases', 'templates'], 'readwrite');
+  await tx.objectStore('profiles').delete(profileId);
+  for (const p of phrases) await tx.objectStore('phrases').delete(p.id);
+  for (const t of templates) await tx.objectStore('templates').delete(t.id);
+  await tx.done;
+}
+
 // --- Phrases ----------------------------------------------------------------
 
 export async function getPhrases(profileId: string): Promise<Phrase[]> {
